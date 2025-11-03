@@ -52,7 +52,8 @@ export default function Header({onLoginClick}){
             
                 <NavLink to="/Home" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>Home</NavLink>
                 <NavLink to="/About" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>About</NavLink>
-                <NavLink to="" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>About</NavLink>
+                <NavLink to="/TodoTask" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>TodoTask</NavLink>
+                <NavLink to="/UserPersonlDetails" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>Profile</NavLink>
                 
             </nav>
             <div className="mr-6" onClick={HandleToggleslide}>

@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import InputField from "../Header/InputField";
 import useAuth from "../context/AuthContext";
-export default function UserForm({loginClose}){
+ const UserForm=React.memo(
+ function UserForm({loginClose}){
     const [islogpage, setlaoginpage]=useState(true)
     const[Errors,setErrors]=useState({})
     const Nameinputref =useRef()
@@ -51,10 +52,19 @@ export default function UserForm({loginClose}){
     function handlesubmit(){
         if(!ValidationInput()) return;
         if(islogpage){
+            Emailinputref.current.clear();
+            Passwodinputref.current.clear();
+            Emailinputref.current.getValue();
+            
             console.log("email:",Data.Email);
             console.log("email:",Data.Password);
 
             const found=FoundUser(Data.Email,Data.Password)
+            Setdata({
+        Username:"",
+        Password:"",
+        CPassword:"",
+        Email:"" }) 
             console.log("currentdata:",found);
             if(found){
                 loginClose(); 
@@ -127,3 +137,5 @@ export default function UserForm({loginClose}){
         </>
     )
 }
+ )
+ export default UserForm

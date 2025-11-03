@@ -1,11 +1,24 @@
-import { forwardRef } from "react";
+import { forwardRef,useImperativeHandle, useRef } from "react";
 import { useCallback } from "react";
 const InputField=forwardRef(({value,onChange,type="text",name,placeholder,label,Error
 },ref)=>{
+    const inputRef=useRef()
+    useImperativeHandle(ref,()=>({
+        focus: () => {
+      inputRef.current.focus();
+    },
+    clear: () => {
+      inputRef.current.value = "";
+    },
+    getValue: () => {
+      return inputRef.current.value;
+    }
+
+    }))
     return(<>
     <div className="w-full my-2 ">
         <label>{label}</label>
-        <input ref={ref}
+        <input ref={inputRef}
          type={type} 
         placeholder={placeholder} 
         value={value} 
