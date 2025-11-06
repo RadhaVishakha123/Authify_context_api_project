@@ -2,9 +2,15 @@ import { Link,NavLink } from "react-router-dom"
 import useAuth from "../context/AuthContext.js"
 import { useState } from "react"
 import { useRef ,useEffect} from "react"
-export default function Header({onLoginClick}){
-    const {CurrentUser,Logout}=useAuth()
+import { useNavigate } from "react-router-dom"
+import UserPersonlDetails from "../UserDataForm/UserPersonlDetails.jsx"
+import Authform from "../Authformfolder/Authform.jsx"
+export default function Header(){
+  
+
+    const {CurrentUser,Logout,IsuserFormopen,openUserform,closeUserform,IsProfileopen,openProfile,closeProfile}=useAuth()
     const [isUserIconSlide, setUserIconSlide]=useState(false);
+    const navigate=useNavigate()
     const Slideref=useRef(null)//ref to doesn’t exist yet — it hasn’t been rendered to the DOM.
     function HandleToggleslide(e){
         
@@ -17,8 +23,13 @@ export default function Header({onLoginClick}){
 
     }
     function SubmitLogin(){
-        onLoginClick();
+        openUserform()
         setUserIconSlide(false);
+    }
+    function ProfileUserhandling(){
+      openProfile()
+      setUserIconSlide(false);
+
     }
     
     useEffect(()=>{
@@ -27,6 +38,7 @@ export default function Header({onLoginClick}){
         setUserIconSlide(false);
       }
     }
+    
 
     if (isUserIconSlide) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -53,7 +65,7 @@ export default function Header({onLoginClick}){
                 <NavLink to="/Home" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>Home</NavLink>
                 <NavLink to="/About" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>About</NavLink>
                 <NavLink to="/TodoTask" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>TodoTask</NavLink>
-                <NavLink to="/UserPersonlDetails" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>Profile</NavLink>
+                {/* <NavLink to="/UserPersonlDetails" className={({isActive})=>(isActive?"text-blue-800":"text-gray-700")}>Profile</NavLink> */}
                 
             </nav>
             <div className="mr-6" onClick={HandleToggleslide}>
@@ -62,8 +74,10 @@ export default function Header({onLoginClick}){
             {isUserIconSlide && (
   <div  className="absolute right-4 mt-8 bg-white shadow-lg rounded-xl p-4">
     {CurrentUser ? (
-      <div ref={Slideref}>
-        <p>Hello, {CurrentUser.Username}</p>
+      <div ref={Slideref} className="flex flex-col">
+        <button onClick={ProfileUserhandling} className="bg-blue-500 text-white mb-3 p-2 rounded">
+          + Profile
+        </button>
         <button onClick={LogoutUser} className="bg-red-500 text-white p-2 rounded">
           Logout
         </button>
@@ -76,8 +90,35 @@ export default function Header({onLoginClick}){
   </div>
 )}
 
+
         </div>
         </div>
+        {IsuserFormopen && (
+            <div className="fixed inset-0 bg-black/30 flex justify-center items-center h-screen">
+              <div className="bg-white p-6 rounded-xl shadow-2xl relative w-96">
+                <button
+                  onClick={closeUserform}
+                  className="absolute top-2 right-3 text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+                <Authform />
+              </div>
+            </div>
+          )}
+          {IsProfileopen && (
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center h-screen">
+              <div className="bg-white p-6 rounded-xl shadow-2xl relative ">
+                <button
+                  onClick={closeProfile}
+                  className="absolute top-2 right-3 text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+                <UserPersonlDetails />
+              </div>
+            </div>
+          )}
         </>
     )
 }

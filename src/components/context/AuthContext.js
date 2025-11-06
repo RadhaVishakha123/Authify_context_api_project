@@ -7,7 +7,12 @@ registerdata1:[
 CurrentUser:null,
 Logout:()=>{},
 AddUser:(data)=>{},
-FoundUser:(Email,Password)=>{}
+FoundUser:(Email,Password)=>{},
+UserProfiledata:[],
+AddUpadteProfile:()=>{},
+FetchExitProfile:()=>{},
+IsuserFormopen:false,openUserform:()=>{},closeUserform:()=>{},//login register form
+          IsProfileopen:false,openProfile:()=>{},closeProfile:()=>{}//profile form
 });
 export const AuthContextProvider=AuthContext.Provider;
 export default function useAuth(){

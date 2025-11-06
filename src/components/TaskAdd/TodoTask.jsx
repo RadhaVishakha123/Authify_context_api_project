@@ -41,7 +41,7 @@ switch(Action.Type){
     if(CurrentUser){
     return(
         <>
-        <div className="flex justify-center items-center w-full">
+        <div className="flex justify-center items-center h-screen">
   <div className="w-80 rounded-2xl p-4 shadow-lg bg-white">
     <InputField
       ref={Taskinput}

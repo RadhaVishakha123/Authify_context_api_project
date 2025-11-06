@@ -1,186 +1,198 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import StudentdataSchema from '../ZodSchema/StudentdataSchema'
+import StudentdataSchema from "../ZodSchema/StudentdataSchema";
 import { useEffect, useState } from "react";
+import { email, json, nanoid } from "zod";
+import useAuth from "../context/AuthContext";
 export default function UserPersonlDetails() {
-  const [iscpassword,setcpasword]=useState(false)
+  const {CurrentUser,AddUpadteProfile,FetchExitProfile,closeProfile}=useAuth()
+  
   const {
     register,
     handleSubmit,
-    formState: { errors,isDirty,isValid,isSubmitting,touchedFields},
-    reset,unregister,watch
-  } = useForm({mode:"onTouched",
-    resolver:zodResolver(StudentdataSchema)
-  });//mode: "onTouched" → runs validation when user touches (focus + blur) a field.
-// Other modes:
-// "onChange" → validate as user types.
-// "onBlur" → validate when user leaves input.
-// "onSubmit" (default) → validate only on form submit.
+    formState: { errors, isDirty, isValid, isSubmitting, touchedFields },
+    reset,
+    setValue,
+    watch,
+  } = useForm({ mode: "onTouched", resolver: zodResolver(StudentdataSchema) }); //mode: "onTouched" → runs validation when user touches (focus + blur) a field.
+  // Other modes:
+  // "onChange" → validate as user types.
+  // "onBlur" → validate when user leaves input.
+  // "onSubmit" (default) → validate only on form submit.
   const form = useForm();
-console.log("UserForm:",form);
-
+  console.log("UserForm:", form);
+useEffect(()=>{
+  const profiledata=FetchExitProfile()
+  reset(profiledata)
+},[reset])
   function SubmitForm(Data) {
-    console.log("User data:", Data);
-    const StudentData=JSON.parse(localStorage.getItem("StudentData"))||[];
-    StudentData.push(Data)
-    localStorage.setItem("StudentData",JSON.stringify(StudentData))
- 
-    alert("data submit succesfuly");
-    reset()
-    
+    // console.log("User data:", Data);
+    // const StudentData = JSON.parse(localStorage.getItem("StudentData")) || [];
+    // StudentData.push(Data);
+    // localStorage.setItem("StudentData", JSON.stringify(StudentData));
+
+    // alert("data submit succesfuly");
+    const Userdata={id:CurrentUser.id,...Data}
+    AddUpadteProfile(Userdata);
+    closeProfile();
+    reset();
   }
- let password=watch("Password");
- let cpassword=watch("cPassword")
- useEffect(()=>{
-  if(password && cpassword){
-  if(password==cpassword){
-    setcpasword(false);
-  }
-  else{
-    setcpasword(true);
-  }
- }
- },[password,cpassword])
- 
+  // let password = watch("Password");
+  // let cpassword = watch("cPassword");
+  // useEffect(() => {
+  //   if (password && cpassword) {
+  //     if (password == cpassword) {
+  //       setcpasword(false);
+  //     } else {
+  //       setcpasword(true);
+  //     }
+  //   }
+  // }, [password, cpassword]);
 
   return (
     <>
-      <div className="flex  justify-center items-center w-full m-4 p-4">
-        <div className="w-250 rounded-2xl p-4 shadow-lg bg-blue-50 ">
-          <h2 className="text-center text-2xl font-bold mb-4">
-            User Information Form
-          </h2>
-          <form
-            onSubmit={handleSubmit(SubmitForm)}
-            className="flex flex-wrap justify-between gap-4"
-          >
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Full Name</label>
-              <input
-                {...register("fullname")}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></input>
-              { errors.fullname && (
-                <p className="text-red-500 text-sm">
-                  {errors.fullname.message}
-                </p>
-              )}
+    
+      <div className="w-full max-w-2xl  p-6 ">
+        <h2 className="text-center text-2xl font-bold mb-6">
+          User Information Form
+        </h2>
+
+        <form
+          onSubmit={handleSubmit(SubmitForm)}
+          className="flex flex-col gap-4"
+        >
+          {/* Each field */}
+          {[
+            { label: "Full Name", name: "fullname", type: "text" },
+            { label: "Email", name: "Email", type: "email" },
+            { label: "Phone No.", name: "Phone", type: "number" },
+            { label: "Address", name: "Address", type: "textarea" },
+          ].map((field) => (
+            <div
+              key={field.name}
+              className="flex flex-col sm:flex-row sm:items-start sm:gap-6"
+            >
+              {/* Label */}
+              <label className="w-40 text-lg font-medium shrink-0 pt-2">
+                {field.label}
+              </label>
+
+              {/* Input + error */}
+              <div className="flex flex-col flex-1">
+                {field.type === "textarea" ? (
+                  <textarea
+                    {...register(field.name)}
+                    className="w-full p-2 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    {...register(field.name)}
+                    onInput={
+                      field.name === "Phone"
+                        ? (e) => {
+                            if (e.target.value.length > 10)
+                              e.target.value = e.target.value.slice(0, 10);
+                          }
+                        : undefined
+                    }
+                    readOnly={field.name=="Email"}
+                    className="w-full p-2 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
+                  />
+                )}
+                {errors[field.name] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[field.name].message}
+                  </p>
+                )}
+                {/* {field.name === "cPassword" && iscpassword && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Passwords do not match
+                  </p>
+                )} */}
+              </div>
             </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Email</label>
-              <input type="email"
-                {...register("Email", )}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></input>
-              {errors.Email && (
-                <p className="text-red-500 text-sm">{errors.Email.message}</p>
-              )}
-            </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Password</label>
-              <input type="password"
-                {...register("Password", )}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></input>
-              {errors.Password && (
-                <p className="text-red-500 text-sm">{errors.Password.message}</p>
-              )}
-            </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Comfirm Password</label>
-              <input type="password"
-                {...register("cPassword", )}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></input>
-              {errors.cPassword && (
-                <p className="text-red-500 text-sm">{errors.cPassword.message}</p>
-              )}
-              {iscpassword && (
-                <p className="text-red-500 text-sm">Passwords do not match</p>
-              )}
-            </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Phone No.</label>
-              <input type="number" 
-                {...register("Phone", )}
-                onInput={(e)=>{
-                  if(e.target.value.length>10)
-                    e.target.value=e.target.value.slice(0,10);
-                }}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></input>
-              {errors.Phone && (
-                <p className="text-red-500 text-sm">{errors.Phone.message}</p>
-              )}
-            </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Address</label>
-              <textarea
-                {...register("Address", )}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
-              ></textarea>
-              {errors.Address && (
-                <p className="text-red-500 text-sm">{errors.Address.message}</p>
-              )}
-            </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Course</label>
+          ))}
+
+          {/* Course */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:gap-6">
+            <label className="w-40 text-lg font-medium shrink-0 pt-2">
+              Course
+            </label>
+            <div className="flex flex-col flex-1">
               <select
-                {...register("Course", )}
-                className="w-80 p-1 m-1 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
+                {...register("Course")}
+                className="w-full p-2 rounded-xl border-2 bg-blue-100 border-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-700 outline-none"
               >
-             
+                <option value="">Select Course</option>
                 <option value="BSCIT">BSCIT</option>
                 <option value="BBA">BBA</option>
                 <option value="BCom">BCom</option>
               </select>
               {errors.Course && (
-                <p className="text-red-500 text-sm">{errors.Course.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.Course.message}
+                </p>
               )}
             </div>
-            <div className="w-[48%] p-4 rounded-xl flex items-center justify-between gap-2">
-              <label className=" text-lg mb-1">Gender</label>
-              <label>
-  <input type="radio"
-        value="male"
-        
-        {...register("gender")} /> Male
-</label>
-<label>
-  <input type="radio" {...register("gender")}  value="female" /> Female
-</label>
+          </div>
+
+          {/* Gender */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:gap-6">
+            <label className="w-40 text-lg font-medium shrink-0 pt-2">
+              Gender
+            </label>
+            <div className="flex flex-col flex-1">
+              <div className="flex gap-6">
+                <label>
+                  <input type="radio" value="male" {...register("gender")} />{" "}
+                  Male
+                </label>
+                <label>
+                  <input type="radio" value="female" {...register("gender")} />{" "}
+                  Female
+                </label>
+              </div>
               {errors.gender && (
-                <p className="text-red-500 text-sm">{errors.gender.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.gender.message}
+                </p>
               )}
             </div>
-            <div className="w-full p-4 rounded-xl flex justify-center">
-              <button
-                type="submit" disabled={!isDirty || !isValid }
-                className={`px-6 py-2 bg-blue-600 text-white rounded-xl transition ${
-            isDirty && isValid
-              ? "bg-blue-600 hover:bg-blue-800 text-white"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-              >
-                Submit
-                
-              </button>
-            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="flex justify-center mt-4">
+            <button
+              type="submit"
+              disabled={!isDirty || !isValid}
+              className={`px-8 py-2 rounded-xl text-white font-semibold transition ${
+                isDirty && isValid
+                  ? "bg-blue-600 hover:bg-blue-800"
+                  : "bg-gray-300 cursor-not-allowed text-gray-600"
+              }`}
+            >
+              Submit
+            </button>
+          </div>
+
+          
+
             {/* Live Form Info (just to show how formState changes) */}
-        <div className="mt-4 text-sm text-gray-700">
-          <p>🧩 isDirty: {isDirty ? "true" : "false"}</p> 
-           {/* isDirty
+            <div className="mt-4 text-sm text-gray-700">
+              <p>🧩 isDirty: {isDirty ? "true" : "false"}</p>
+              {/* isDirty
 true → The user has changed at least one field value
 false → No field has been modified yet */}
-          <p>✅ isValid: {isValid ? "true" : "false"}</p>
-          {/* isValid
+              <p>✅ isValid: {isValid ? "true" : "false"}</p>
+              {/* isValid
 true → All inputs are valid (no validation errors)
 false → There are validation errors present */}
-          <p>⏳ isSubmitting: {isSubmitting ? "true" : "false"}</p>
-        </div>
+              {/* <p>⏳ isSubmitting: {isSubmitting ? "true" : "false"}</p> */}
+            </div>
           </form>
         </div>
-      </div>
+      
     </>
   );
 }
